@@ -36,22 +36,28 @@ const homeworkContainer = document.querySelector('#homework-container');
  Массив городов пожно получить отправив асинхронный запрос по адресу
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
-function loadTowns() {
-  return new Promise((resolve, reject) => {
-   const xhr = new XMLHttpRequest();
-   xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json');
-   xhr.responseType = 'json';
-   xhr.send();
-   xhr.addEventListener('load', () => {
-     if (xhr.status >= 400) reject();
-     else resolve( xhr.response.sort((a, b) => {
-                               if (a.name < b.name) return -1;
-                               if (a.name > b.name) return 1;
-                               return 0;}));
-   });
- } )
-
-}
+ function loadTowns() {
+     return new Promise((resolve, reject) => {
+         var xhr = new XMLHttpRequest();
+         xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json');
+         xhr.send();
+         xhr.responseType = 'json';
+         xhr.addEventListener('load', ()=> {
+             if (xhr.status >= 400) {
+                 console.log('something went wrong');
+                 reject();
+             } else {
+                 const obj = xhr.response;
+                 obj.sort((a, b) => {
+                     let textA = a.name.toUpperCase();
+                     let textB = b.name.toUpperCase();
+                     return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+                 });
+                 resolve(obj);
+             }
+         });
+     });
+ }
 
 /*
  Функция должна проверять встречается ли подстрока chunk в строке full
@@ -78,9 +84,33 @@ const filterBlock = homeworkContainer.querySelector('#filter-block');
 const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
+var array = [];
+loadTowns()
+ .then (obj =>
+   {for (const o of obj){
+     array.push(o);
+   }
+   })
+ .catch(() => console.log('wtf'));
 
+
+console.log(array);
 filterInput.addEventListener('keyup', function() {
     // это обработчик нажатия кливиш в текстовом поле
+    let filtr = filterInput.value;
+
+    filterResult.innerText = '';
+    filterResult.innerHTML = '';
+    if (filtr) {
+     for (var i = 0; i < array.length; i++){
+      if (isMatching(array[i].name, filtr)){
+      const town = document.createElement('div');
+      town.classList.add('town');
+      town.textContent = array[i].name;
+      filterResult.appendChild(town);}
+}
+}
+else return;
 });
 
 export {
